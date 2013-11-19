@@ -1,4 +1,5 @@
 uk.co.compucorp.civicrm.mailjet
 ===============================
 
-CiviMailJet
+CiviMailJet - MailJet Extension for CiviCRM
+
