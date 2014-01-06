@@ -112,15 +112,7 @@
       <td class="label">{ts}Unsub Rate{/ts}</td>
       <td>{$mailjet_stats.unsub_rate} ({$mailjet_stats.unsub_rate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
-      <td class="label">{ts}Count Messages{/ts}</td>
-      <td>{$mailjet_stats.event_totals.delivered} ({$report.event_totals|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Count Messages{/ts}</td>
-      <td>{$mailjet_stats.event_totals.delivered} ({$report.event_totals|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Failure Rate{/ts}</td>
       <td>{$mailjet_stats.failure_rate} ({$mailjet_stats.failure_rate|string_format:"%0.2f"}%)</td>
     </tr>
