@@ -19,6 +19,40 @@ function mailjet_civicrm_alterMailParams(&$params, $context, $jobId) {
   }
 }
 
+
+/**
+ * Implementation of hook_civicrm_pageRun
+ *
+ * Handler for pageRun hook.
+ */
+function mailjet_civicrm_pageRun(&$page) {
+  if(get_class($page) == 'CRM_Mailing_Page_Report'){
+    $mailingId = $page->_mailing_id;
+    include_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
+    // Create a new Mailjet Object
+    $mj = new Mailjet();
+    $mj->debug = 0;
+    $mailJetParams = array(
+      'custom_campaign' =>  $mailingId
+    );
+    $response = $mj->messageList($mailJetParams);
+    if($response->status == 'OK' && $response->total_cnt == 1){
+      $campaign = $response->result[0];
+      $mailJetParams = array(
+        'campaign_id' => $campaign->id
+      );
+      $response = $mj->reportEmailStatistics($mailJetParams);
+      if($response->status == 'OK'){
+        $stats = $response->stats;
+        $page->assign('mailjet_stats', get_object_vars($stats));
+      }
+    }
+    CRM_Core_Region::instance('page-header')->add(array(
+      'template' => 'CRM/Mailjet/Page/Report.tpl',
+    ));
+  }
+}
+
 /**
  * Implementation of hook_civicrm_config
  */
