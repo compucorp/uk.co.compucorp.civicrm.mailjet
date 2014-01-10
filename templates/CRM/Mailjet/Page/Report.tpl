@@ -140,6 +140,17 @@
     </div>
 {/if}
 </fieldset>
+{literal}
+ <script>
+  cj(function($) {
+    //remove clickedThroughs report from the default CiviCRM report as we are more interested in Mailjet's stats
+    var clickedThroughs = $("td").filter(function() {
+        return $(this).text() == 'Click-throughs';
+    }).closest("tr");
+    clickedThroughs.remove();
+  });
+ </script>
+ {/literal}
 
 
 
