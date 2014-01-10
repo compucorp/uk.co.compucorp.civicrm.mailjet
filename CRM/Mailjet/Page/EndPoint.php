@@ -12,6 +12,9 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
       return;
     }
 
+    watchdog('debug', $post);
+
+
     //Decode Trigger Informations
     $trigger = json_decode($post, true);
 
@@ -78,7 +81,7 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
         case 'spam':
         case 'blocked':
           $bounce             = new CRM_Mailing_Event_BAO_Bounce();
-          $bounce->time_stamp =  date('YmdHis', $time);
+          $bounce->time_stamp =  $time;
           $bounce->event_queue_id = $eventQueue->id;
           $bounceReason = NULL;
           if(isset($trigger['hard_bounce'])){
