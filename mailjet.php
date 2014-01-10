@@ -75,41 +75,6 @@ function mailjet_civicrm_xmlMenu(&$files) {
  * Implementation of hook_civicrm_install
  */
 function mailjet_civicrm_install() {
-
-  $bounceType = array(
-    '1' => array (
-      'name' => 'Mailjet Hard Bounces',
-      'description' => 'Mailjet Hard Bounces',
-      'hold_threshold' => 1,
-    ),
-    '2' => array (
-      'name' => 'Mailjet Soft Bounces',
-      'description' => 'Mailjet Soft Bounces',
-      'hold_threshold' => 3,
-    ),
-  );
-
-  foreach ($bounceType as $type) {
-    $bounceTypeDAO = new CRM_Mailing_DAO_BounceType();
-    $bounceTypeDAO->copyValues($type);
-    if(!$bounceTypeDAO->find(true)) {
-      $bounceTypeDAO->save();
-    }
-  }
-
-  $params = array(
-    'domain_id' => 1,
-    'run_frequency' => 'Hourly',
-    'last_run' => NULL,
-    'name' => 'MailJet Bounces Processor'
-    'description' => NULL,
-    'api_entity' => 'mailjet',
-    'api_action' => 'process_bounces'
-    'parameters' => NULL,
-    'is_active' => 1
-  );
-  $result = civicrm_api3('Job', 'create', $params);
-
   return _mailjet_civix_civicrm_install();
 }
 
@@ -117,6 +82,7 @@ function mailjet_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function mailjet_civicrm_uninstall() {
+
   return _mailjet_civix_civicrm_uninstall();
 }
 

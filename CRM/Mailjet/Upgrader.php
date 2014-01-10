@@ -5,21 +5,69 @@
  */
 class CRM_Mailjet_Upgrader extends CRM_Mailjet_Upgrader_Base {
 
+  const SOFT_BOUNCE = 'Mailjet Soft Bounces';
+  const HARD_BOUNCE = 'Mailjet Hard Bounces';
+  const BLOCKED = 'Mailjet Blocked';
+  const SPAM = 'Mailjet Spam';
+
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
   /**
    * Example: Run an external SQL script when the module is installed
-   *
+   **/
   public function install() {
-    $this->executeSqlFile('sql/myinstall.sql');
+    //Install Mailjet bounce types
+    $bounceType = array(
+      1 => array(
+        'name' => self::HARD_BOUNCE,
+        'description' => 'Emails "Hard Bounces" by Mailjet’s system',
+        'hold_threshold' => 1,
+      ),
+      2 => array(
+        'name' => self::SOFT_BOUNCE,
+        'description' => 'Emails "Soft Bounces" by Mailjet’s system',
+        'hold_threshold' => 3,
+      ),
+      3 => array(
+        'name' => self::BLOCKED,
+        'description' => 'Emails ”Blocked” by Mailjet’s system',
+        'hold_threshold' => 1,
+      ),
+      4 => array(
+        'name' => self::SPAM,
+        'description' => 'Emails reported as "Spam"',
+        'hold_threshold' => 1,
+      ),
+    );
+
+    foreach ($bounceType as $type) {
+      $bounceTypeDAO = new CRM_Mailing_DAO_BounceType();
+      $bounceTypeDAO->copyValues($type);
+      if(!$bounceTypeDAO->find(true)) {
+        $bounceTypeDAO->save();
+      }
+    }
+    //$this->executeSqlFile('sql/myinstall.sql');
   }
 
   /**
    * Example: Run an external SQL script when the module is uninstalled
-   *
+   **/
   public function uninstall() {
-   $this->executeSqlFile('sql/myuninstall.sql');
+    $bounceType = array(
+      1 => array('name' => self::HARD_BOUNCE),
+      2 => array('name' => self::SOFT_BOUNCE),
+      3 => array('name' => self::BLOCKED),
+      4 => array('name' => self::SPAM),
+    );
+    foreach ($bounceType as $type) {
+      $bounceTypeDAO = new CRM_Mailing_DAO_BounceType();
+      $bounceTypeDAO->copyValues($type);
+      if(!$bounceTypeDAO->find(true)) {
+        $bounceTypeDAO->delete();
+      }
+    }
   }
 
   /**
