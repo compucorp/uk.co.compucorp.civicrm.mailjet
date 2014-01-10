@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <extension key="uk.co.compucorp.civicrm.mailjet" type="module">
   <file>mailjet</file>
-  <name>CiviMailJet</name>
-  <description>A MailJet Integration extension for CiviCRM</description>
-  <license>FIXME</license>
+  <name>CiviMjailjet</name>
+  <description>A Mailjet Integration extension for CiviCRM</description>
+  <license>the GNU Affero General Public License 3 (GNU AGPL 3) and the CiviCRM Licensing Exception.</license>
   <maintainer>
     <author>Erawat Chamanont, Jamie Novick</author>
     <email>erawat@compucorp.co.uk, jamie@compucorp.co.uk</email>
