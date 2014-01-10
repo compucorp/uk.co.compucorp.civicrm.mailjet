@@ -8,9 +8,7 @@
  * @return void
  * @see http://wiki.civicrm.org/confluence/display/CRM/API+Architecture+Standards
  */
-function _civicrm_api3_mailjet_processbounces_spec(&$spec) {
-  //$spec['magicword']['api.required'] = 1;
-}
+function _civicrm_api3_mailjet_processbounces_spec(&$spec) {}
 
 /**
  * Mailjet.ProcessBounces API
@@ -26,7 +24,7 @@ function civicrm_api3_mailjet_processbounces($params) {
   if (!$lock->isAcquired()) {
     return civicrm_api3_create_error('Could not acquire lock, another MailjetProcessor process is running');
   }
-  if (!CRM_Utils_Mail_EmailProcessor::processBounces()) {
+  if (!CRM_Utils_Mail_MailjetProcessor::processBounces()) {
     $lock->release();
     return civicrm_api3_create_error('Process Bounces failed');
   }
