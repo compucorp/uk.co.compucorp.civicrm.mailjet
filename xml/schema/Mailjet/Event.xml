@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Mailjet</base>
+  <class>Event</class>
+  <name>civicrm_mailing_mailjet_event</name>
+  <comment></comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment></comment>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>mailing_id</name>
+    <title>Mailing ID</title>
+    <type>int unsigned</type>
+    <comment>FK to mailing ID and customcampiang on Mailjet</comment>
+  </field>
+
+  <!-- event type -->
+  <!-- timestamp -->
+
+  <field>
+    <name>email</name>
+    <type>varchar</type>
+    <length>255</length>
+    <comment>Email address of recipient triggering the event</comment>
+    <title>Email</title>
+    <required>true</required>
+    <export>true</export>
+  </field>
+
+   <field>
+    <name>event</name>
+    <type>varchar</type>
+    <length>255</length>
+    <comment></comment>
+    <title>Mailjet event type</title>
+    <comment>The mailjet event type</comment>
+    <required>true</required>
+    <export>true</export>
+  </field>
+
+  <field>
+    <name>mj_campaign_id</name>
+    <title>Mailjet Campaign ID</title>
+    <type>int unsigned</type>
+    <comment>The mailjet campaing _id</comment>
+    <export>true</export>
+  </field>
+
+
+  <field>
+    <name>mj_contact_id</name>
+    <title>Mailjet Contact ID</title>
+    <type>int unsigned</type>
+    <comment>The mailjet campaing _id</comment>
+    <export>true</export>
+  </field>
+
+  <field>
+    <name>time</name>
+    <type>datetime</type>
+    <comment>Unix timestamp of event (free of timezone concerns)</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>data</name>
+    <type>text</type>
+    <comment>Mailjet row data</comment>
+    <htmlType>textarea</htmlType>
+    <rows>20</rows>
+    <cols>80</cols>
+  </field>
+
+
+  <field>
+    <name>created_date</name>
+    <type>datetime</type>
+    <required>true</required>
+  </field>
+
+
+</table>
