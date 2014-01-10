@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/mailjet/event/endpoint</path>
+    <page_callback>CRM_Mailjet_Page_EndPoint</page_callback>
+    <access_callback>1</access_callback>
+    <title>EndPoint</title>
+  </item>
+</menu>
