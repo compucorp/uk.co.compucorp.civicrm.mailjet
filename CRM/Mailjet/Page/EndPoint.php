@@ -6,28 +6,14 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
 
   function run() {
     $post = trim(file_get_contents('php://input'));
-    /*if(empty($post)) {
+    if(empty($post)) {
       header('HTTP/1.1 421 No event');
        // => do action
       return;
-    }*/
-    watchdog('debug', $post);
-
+    }
 
     //Decode Trigger Informations
-    //$trigger = json_decode($post, true);
-    //simulate trigger
-    $trigger = array(
-      'event' => 'bounce',
-      'time' => '1389027540',
-      'email' => 'fake@noneemail.com',
-      'hard_bounce' => 1,
-      'mj_campaign_id' => '1577031072',
-      'mj_contact_id' => '929243758',
-      'customcampaign' => '32',
-      'error_related_to' => 'domain',
-      'error' => 'no mail host'
-    );
+    $trigger = json_decode($post, true);
 
     //No Informations sent with the Event
     if(!is_array($trigger) || !isset($trigger['event'])) {
