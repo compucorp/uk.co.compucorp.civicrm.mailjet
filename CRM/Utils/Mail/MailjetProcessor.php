@@ -56,7 +56,7 @@ class CRM_Utils_Mail_MailjetProcessor {
         $contactId = $emailResult['values'][$emailResult['id']]['contact_id'];
         $emailId = $emailResult['id'];
         $params = array(
-          'mailing_id' => $mailingId,
+          'mailing_id' => $bounce->customcampaign,
         );
         $result = civicrm_api3('MailingJob', 'get', $params);
         $jobIds = array();
@@ -84,7 +84,7 @@ class CRM_Utils_Mail_MailjetProcessor {
         if(!$isBounceRecord){
           $bounceArray = array(
             'is_spam' => FALSE,
-            'mailing_id' => $mailingId,
+            'mailing_id' => $bounce->customcampaign,
             'contact_id' => $contactId,
             'email_id' => $emailId,
             'blocked' => $bounce->blocked,
