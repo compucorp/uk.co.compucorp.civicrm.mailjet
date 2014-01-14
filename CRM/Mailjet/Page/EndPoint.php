@@ -41,8 +41,19 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
 
     //Decode Trigger Informations
     $trigger = json_decode($post, true);
+    /*
+    $trigger = array(
+      'event' => 'spam',
+      'email' => 'test@notsurefithisisexist111.com',
+      'mj_campaign_id' => '1576350486',
+      'mj_contact_id' => '929243758',
+      'customcampaign' => '31',
+      'source' => 'source',
+      'date_ts' => '10/10/2012 00:00:00',
+    );*/
 
     //No Informations sent with the Event
+
     if(!is_array($trigger) || !isset($trigger['event'])) {
       header('HTTP/1.1 422 Not ok');
       // TODO:: notifiy admin
@@ -67,13 +78,15 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
     $mailjetEvent->created_date = date('YmdHis');
     $mailjetEvent->save(); //log event
 
+
     if($event == 'typofix'){
       //we do not handle typofix
       // TODO:: notifiy admin
       return;
     }
-    $emailResult = civicrm_api3('Email', 'get', $params);
-    if(CRM_Utils_Array::value('values', $emailResult)){
+
+    $emailResult = civicrm_api3('Email', 'get', array('email' => $email));
+    if(isset($emailResult['values']) && !empty($emailResult['values'])){
       $contactId = $emailResult['values'][$emailResult['id']]['contact_id'];
       $emailId = $emailResult['id'];
       $params = array(
@@ -110,7 +123,7 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
           //TODO: handle error
           break;
         # No handler
-        default:k
+        default:
           header('HTTP/1.1 423 No handler');
           // Log if there is no handler
           break;
