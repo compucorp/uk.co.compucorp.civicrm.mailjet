@@ -41,13 +41,21 @@ class CRM_Utils_Mail_MailjetProcessor {
    * @return boolean always returns true (for the api). at a later stage we should
    *                 fix this to return true on success / false on failure etc
    */
-  static function processBounces() {
+  static function processBounces($mailingId = NULL) {
     require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
       // Create a new Mailjet Object
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
-    //get all bounces email
-    $response = $mj->reportEmailBounce();
+    if($mailingId){
+      $respone = $mj->messageList(array('custom_campaign' => $mailingId));
+      if(!$response){
+         return TRUE; //always return true - we don't process bounces if there is no reponse.
+      }
+      $campaign = $response->result[0];
+      $response = $mj->reportEmailBounce(array('campaign_id' => $campaign->id));
+    }else{
+      $response = $mj->reportEmailBounce();
+    }
     $bounces = $response->bounces;
     foreach ($bounces as $bounce) {
       $params = array('email' => $bounce->email);
@@ -55,6 +63,10 @@ class CRM_Utils_Mail_MailjetProcessor {
       if(CRM_Utils_Array::value('values', $emailResult)){
         $contactId = $emailResult['values'][$emailResult['id']]['contact_id'];
         $emailId = $emailResult['id'];
+        if(!$bounce->customcampaign){
+          //do not process bounce if we dont have custom campaign
+          continue;
+        }
         $params = array(
           'mailing_id' => $bounce->customcampaign,
         );
