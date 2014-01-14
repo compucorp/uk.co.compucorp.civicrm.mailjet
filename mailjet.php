@@ -5,9 +5,9 @@ require_once 'mailjet.civix.php';
 /**
  * Implementation of hook_civicrm_alterMailParams( )
  * To add Mailjet headers in mail
- * Hacked overrided civicrm_alterMailParams hooks // TODO::contribute back to the core
  */
-function mailjet_civicrm_alterMailParams(&$params, $context, $jobId) {
+function mailjet_civicrm_alterMailParams(&$params, $context) {
+  $jobId = CRM_Utils_Array::value('job_id', $params); //CiviCRM job ID
   if(isset($jobId)){
     $apiParams = array(
       'id' => $jobId
@@ -28,9 +28,9 @@ function mailjet_civicrm_alterMailParams(&$params, $context, $jobId) {
 function mailjet_civicrm_pageRun(&$page) {
   if(get_class($page) == 'CRM_Mailing_Page_Report'){
     $mailingId = $page->_mailing_id;
-    include_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
+    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
     // Create a new Mailjet Object
-    $mj = new Mailjet();
+    $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
     $mailJetParams = array(
       'custom_campaign' =>  $mailingId
