@@ -136,7 +136,7 @@
   {/strip}
 {else}
     <div class="messages status no-popup">
-        {ts}<strong>Mailjet STATS is not avaliable.</strong> .{/ts}
+        {ts}<strong>Mailjet STATS is not available.</strong> .{/ts}
     </div>
 {/if}
 </fieldset>
