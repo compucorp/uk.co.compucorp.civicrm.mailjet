@@ -45,6 +45,7 @@ function mailjet_civicrm_pageRun(&$page) {
         $response = $mj->reportEmailStatistics($mailJetParams);
         if($response->status == 'OK'){
           $stats = $response->stats;
+          $page->assign('mailing_id', $mailingId);
           $page->assign('mailjet_stats', get_object_vars($stats));
         }
       }

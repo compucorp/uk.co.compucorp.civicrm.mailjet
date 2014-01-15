@@ -134,7 +134,7 @@
     </tr>
   </table>
   {/strip}
-<input type="submit" id="updateMailjetButton" name="update_mailjet_button" value="Process Mailjet's bounces" class="form-submit">
+<input type="submit" id="updateMailjetButton" name="update_mailjet_button" value="{ts}Manually refresh Mailjet's stats{/ts}" class="form-submit">
 {else}
     <div class="messages status no-popup">
         {ts}<strong>Mailjet STATS is not available.</strong> .{/ts}
@@ -144,11 +144,19 @@
 {literal}
  <script>
   cj(function($) {
-    //remove clickedThroughs report from the default CiviCRM report as we are more interested in Mailjet's stats
-    var clickedThroughs = $("td").filter(function() {
-        return $(this).text() == 'Click-throughs';
-    }).closest("tr");
-    clickedThroughs.remove();
+    //remove stats report from the default CiviCRM report as we are more interested in Mailjet's stats
+    $("td").filter(function() {
+      var text = $(this).text();
+      switch (text){
+        case 'Click-throughs':
+        case 'Successful Deliveries':
+        case 'Tracked Opens':
+          $(this).closest("tr").remove();
+          break;
+        default:
+          break;
+      }
+    });
 
     $( "#updateMailjetButton" ).on( "click", function() {
       CRM.api('Mailjet','processBounces',{'mailing_id': {/literal}{$mailing_id}{literal}},
