@@ -37,23 +37,10 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
       return;
     }
 
-    watchdog('debug', $post);
-
     //Decode Trigger Informations
     $trigger = json_decode($post, true);
-    /*
-    $trigger = array(
-      'event' => 'spam',
-      'email' => 'test@notsurefithisisexist111.com',
-      'mj_campaign_id' => '1576350486',
-      'mj_contact_id' => '929243758',
-      'customcampaign' => '31',
-      'source' => 'source',
-      'date_ts' => '10/10/2012 00:00:00',
-    );*/
 
     //No Informations sent with the Event
-
     if(!is_array($trigger) || !isset($trigger['event'])) {
       header('HTTP/1.1 422 Not ok');
       // TODO:: notifiy admin
