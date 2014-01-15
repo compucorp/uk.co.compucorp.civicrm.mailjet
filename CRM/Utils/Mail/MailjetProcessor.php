@@ -47,7 +47,8 @@ class CRM_Utils_Mail_MailjetProcessor {
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
     if($mailingId){
-      $respone = $mj->messageList(array('custom_campaign' => $mailingId));
+      $mailjetParams = array('custom_campaign' => $mailingId);
+      $response = $mj->messageList($mailjetParams);
       if(!$response){
          return TRUE; //always return true - we don't process bounces if there is no reponse.
       }
