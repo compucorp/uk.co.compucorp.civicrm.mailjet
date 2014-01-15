@@ -134,6 +134,7 @@
     </tr>
   </table>
   {/strip}
+<input type="submit" id="updateMailjetButton" name="update_mailjet_button" value="Process Mailjet's bounces" class="form-submit">
 {else}
     <div class="messages status no-popup">
         {ts}<strong>Mailjet STATS is not available.</strong> .{/ts}
@@ -148,7 +149,16 @@
         return $(this).text() == 'Click-throughs';
     }).closest("tr");
     clickedThroughs.remove();
+
+    $( "#updateMailjetButton" ).on( "click", function() {
+      CRM.api('Mailjet','processBounces',{'mailing_id': {/literal}{$mailing_id}{literal}},
+        {success: function(data) {
+          location.reload(true);
+        }}
+      );
+    }); //end on click button
   });
+
  </script>
  {/literal}
 
