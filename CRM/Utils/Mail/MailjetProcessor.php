@@ -93,6 +93,7 @@ class CRM_Utils_Mail_MailjetProcessor {
           $isBounceRecord = TRUE;
           break;
         }
+        //if bounce record doesn't exsit so we record it
         if(!$isBounceRecord){
           $bounceArray = array(
             'is_spam' => FALSE,
