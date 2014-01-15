@@ -24,7 +24,8 @@ function civicrm_api3_mailjet_processbounces($params) {
   if (!$lock->isAcquired()) {
     return civicrm_api3_create_error('Could not acquire lock, another MailjetProcessor process is running');
   }
-  if (!CRM_Utils_Mail_MailjetProcessor::processBounces()) {
+  $mailingId = CRM_Utils_Array::value('mailing_id', $params);
+  if (!CRM_Utils_Mail_MailjetProcessor::processBounces($mailingId)) {
     $lock->release();
     return civicrm_api3_create_error('Process Bounces failed');
   }
@@ -32,6 +33,6 @@ function civicrm_api3_mailjet_processbounces($params) {
 
   // FIXME: processBounces doesn't return true/false on success/failure
   $values = array();
-  return civicrm_api3_create_success($values, $params, 'mailing', 'bounces');
+  return civicrm_api3_create_success($values, $params, 'mailjet', 'bounces');
 }
 
