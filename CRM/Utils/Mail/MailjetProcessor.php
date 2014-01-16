@@ -59,11 +59,12 @@ class CRM_Utils_Mail_MailjetProcessor {
     }
     $bounces = $response->bounces;
     foreach ($bounces as $bounce) {
-      $params = array('email' => $bounce->email);
+      $params = array('email' => $bounce->email,'sequential' => 1);
       $emailResult = civicrm_api3('Email', 'get', $params);
-      if(CRM_Utils_Array::value('values', $emailResult)){
-        $contactId = $emailResult['values'][$emailResult['id']]['contact_id'];
-        $emailId = $emailResult['id'];
+      if(!empty($emailResult['values'])){
+        //we always get the first result
+        $contactId = $emailResult['values'][0]['contact_id'];
+        $emailId = $emailResult['values'][0]['id'];
         if(!$bounce->customcampaign){
           //do not process bounce if we dont have custom campaign
           continue;
