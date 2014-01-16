@@ -15,7 +15,6 @@ function mailjet_civicrm_alterMailParams(&$params, $context) {
     $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
     $mailingId = $mailJobResult['values'][$jobId]['mailing_id'];
     $params['headers']['X-Mailjet-Campaign'] = $mailingId;
-    $params['headers']['X-Mailjet-DeduplicateCampaign'] = 1;
   }
 }
 
