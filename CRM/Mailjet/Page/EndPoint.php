@@ -51,71 +51,76 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
     $email = $trigger['email'];
     $time = date('YmdHis', $trigger['time']);
     $mailingId = CRM_Utils_Array::value('customcampaign', $trigger); //CiviCRM mailling ID
-    $mailjetCampaignId = CRM_Utils_Array::value('mj_campaign_id', $trigger);
-    $mailjetContactId = CRM_Utils_Array::value('mj_contact_id' , $trigger);
+    if($mailingId){ //we only process if mailing_id exist - marketing email
+      $mailjetCampaignId = CRM_Utils_Array::value('mj_campaign_id', $trigger);
+      $mailjetContactId = CRM_Utils_Array::value('mj_contact_id' , $trigger);
 
-    $mailjetEvent   = new CRM_Mailjet_DAO_Event();
-    $mailjetEvent->mailing_id = $mailingId;
-    $mailjetEvent->email = $email;
-    $mailjetEvent->event = $event;
-    $mailjetEvent->mj_campaign_id = $mailjetCampaignId;
-    $mailjetEvent->mj_contact_id = $mailjetContactId;
-    $mailjetEvent->time = $time;
-    $mailjetEvent->data = serialize($trigger);
-    $mailjetEvent->created_date = date('YmdHis');
-    $mailjetEvent->save(); //log event
+      $mailjetEvent   = new CRM_Mailjet_DAO_Event();
+      $mailjetEvent->mailing_id = $mailingId;
+      $mailjetEvent->email = $email;
+      $mailjetEvent->event = $event;
+      $mailjetEvent->mj_campaign_id = $mailjetCampaignId;
+      $mailjetEvent->mj_contact_id = $mailjetContactId;
+      $mailjetEvent->time = $time;
+      $mailjetEvent->data = serialize($trigger);
+      $mailjetEvent->created_date = date('YmdHis');
+      $mailjetEvent->save(); //log event
 
 
-    if($event == 'typofix'){
-      //we do not handle typofix
-      // TODO:: notifiy admin
-      return;
-    }
-
-    $emailResult = civicrm_api3('Email', 'get', array('email' => $email));
-    if(isset($emailResult['values']) && !empty($emailResult['values'])){
-      $contactId = $emailResult['values'][$emailResult['id']]['contact_id'];
-      $emailId = $emailResult['id'];
-      $params = array(
-        'mailing_id' => $mailingId,
-        'contact_id' => $contactId,
-        'email_id' => $emailId,
-        'date_ts' =>  $trigger['time'],
-      );
-      /*
-      *  Event handler
-      *  - please check https://www.mailjet.com/docs/event_tracking for further informations.
-      */
-      switch($trigger['event']) {
-        case 'open':
-        case 'click':
-        case 'unsub':
-        case 'typofix':
-          break;
-        //we treat bounce, span and blocked as bounce mailing in CiviCRM
-        case 'bounce':
-        case 'spam':
-        case 'blocked':
-          $params['hard_bounce'] =  CRM_Utils_Array::value('hard_bounce', $trigger);
-          $params['blocked'] = CRM_Utils_Array::value('blocked', $trigger);
-          $params['source'] = CRM_Utils_Array::value('source', $trigger);
-          $params['error_related_to'] =  CRM_Utils_Array::value('error_related_to', $trigger);
-          $params['error'] =   CRM_Utils_Array::value('error', $trigger);
-          if(!empty($params['source'])){
-            $params['is_spam'] = TRUE;
-          }else{
-            $params['is_spam'] = FALSE;
-          }
-          CRM_Mailjet_BAO_Event::recordBounce($params);
-          //TODO: handle error
-          break;
-        # No handler
-        default:
-          header('HTTP/1.1 423 No handler');
-          // Log if there is no handler
-          break;
+      if($event == 'typofix'){
+        //we do not handle typofix
+        // TODO:: notifiy admin
+        return;
       }
-      header('HTTP/1.1 200 Ok');
+
+      $emailResult = civicrm_api3('Email', 'get', array('email' => $email));
+      if(isset($emailResult['values']) && !empty($emailResult['values'])){
+        //we always get the first result
+        $contactId = $emailResult['values'][0]['contact_id'];
+        $emailId = $emailResult['values'][0]['id'];
+        $params = array(
+          'mailing_id' => $mailingId,
+          'contact_id' => $contactId,
+          'email_id' => $emailId,
+          'date_ts' =>  $trigger['time'],
+        );
+        /*
+        *  Event handler
+        *  - please check https://www.mailjet.com/docs/event_tracking for further informations.
+        */
+        switch($trigger['event']) {
+          case 'open':
+          case 'click':
+          case 'unsub':
+          case 'typofix':
+            break;
+          //we treat bounce, span and blocked as bounce mailing in CiviCRM
+          case 'bounce':
+          case 'spam':
+          case 'blocked':
+            $params['hard_bounce'] =  CRM_Utils_Array::value('hard_bounce', $trigger);
+            $params['blocked'] = CRM_Utils_Array::value('blocked', $trigger);
+            $params['source'] = CRM_Utils_Array::value('source', $trigger);
+            $params['error_related_to'] =  CRM_Utils_Array::value('error_related_to', $trigger);
+            $params['error'] =   CRM_Utils_Array::value('error', $trigger);
+            if(!empty($params['source'])){
+              $params['is_spam'] = TRUE;
+            }else{
+              $params['is_spam'] = FALSE;
+            }
+            CRM_Mailjet_BAO_Event::recordBounce($params);
+            //TODO: handle error
+            break;
+          # No handler
+          default:
+            header('HTTP/1.1 423 No handler');
+            // Log if there is no handler
+            break;
+        }
+        header('HTTP/1.1 200 Ok');
+      }
+    }else{ //assumed if there is not mailing_id, this should be a transaction email
+      //TODO::process a transaction email
     }
     CRM_Utils_System::civiExit();
   }
