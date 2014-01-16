@@ -102,7 +102,7 @@ class CRM_Utils_Mail_MailjetProcessor {
             'mailing_id' => $bounce->customcampaign,
             'contact_id' => $contactId,
             'email_id' => $emailId,
-            'blocked' => $bounce->blocked,
+            'blocked' => 0, //if it's manual refresh, we fource it as a normal bounce not blocked
             'hard_bounce' => $bounce->hard_bounce,
             'date_ts' => $bounce->date_ts,
             'error_related_to' => $bounce->error_related_to,
