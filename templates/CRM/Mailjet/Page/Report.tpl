@@ -164,7 +164,7 @@
           location.reload(true);
         }}
       );
-    }); //end on click button
+    }); //end on click button*/
   });
 
  </script>

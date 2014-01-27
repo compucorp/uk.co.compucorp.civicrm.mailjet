@@ -47,7 +47,7 @@ class CRM_Utils_Mail_MailjetProcessor {
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
     if($mailingId){
-      $mailjetParams = array('custom_campaign' => $mailingId);
+      $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($mailingId));
       $response = $mj->messageList($mailjetParams);
       if(!$response){
          return TRUE; //always return true - we don't process bounces if there is no reponse.
@@ -69,8 +69,10 @@ class CRM_Utils_Mail_MailjetProcessor {
           //do not process bounce if we dont have custom campaign
           continue;
         }
+        $campaingArray = explode("MJ", $bounce->customcampaign);
+        $mailingId = $campaingArray[0];
         $params = array(
-          'mailing_id' => $bounce->customcampaign,
+          'mailing_id' => $mailingId,
         );
         $result = civicrm_api3('MailingJob', 'get', $params);
         $jobIds = array();
@@ -99,7 +101,7 @@ class CRM_Utils_Mail_MailjetProcessor {
         if(!$isBounceRecord){
           $bounceArray = array(
             'is_spam' => FALSE,
-            'mailing_id' => $bounce->customcampaign,
+            'mailing_id' => $mailingId,
             'contact_id' => $contactId,
             'email_id' => $emailId,
             'blocked' => 0, //if it's manual refresh, we fource it as a normal bounce not blocked

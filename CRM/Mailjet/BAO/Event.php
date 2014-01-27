@@ -2,6 +2,13 @@
 
 class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
 
+
+  static function getMailjetCustomCampaignId($mailingId){
+    $mailing = civicrm_api3('Mailing', 'get', $params = array('id' => $mailingId));
+    $timestamp = strtotime($mailing['values'][$mailingId]['created_date']);
+    return $mailingId . 'MJ' . $timestamp;
+  }
+
   static function recordBounce($params) {
     $isSpam =  CRM_Utils_Array::value('is_spam', $params);
     $mailingId = CRM_Utils_Array::value('mailing_id', $params); //CiviCRM mailling ID
