@@ -12,8 +12,7 @@ Setup instructions for CiviMailjet extensions
 4. Add add the code below into the site civicrm settings file and put your mailjet api and secret key
 
 
->define( 'MAILJET_API_KEY', 'YOUR MAILJET API KEY');
-
+>define( 'MAILJET_API_KEY', 'YOUR MAILJET API KEY');<br/>
 >define( 'MAILJET_SECRET_KEY', 'YOUR MAILJET SECRET KEY');
 
 
