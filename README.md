@@ -1,4 +1,4 @@
-CiviMailJet - MailJet Extension for CiviCRM 
+CiviMailJet - MailJet integration for CiviCRM 
 ===============================
 
 
