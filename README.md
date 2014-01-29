@@ -13,6 +13,7 @@ Setup instructions for CiviMailjet extensions
 
 
 >define( 'MAILJET_API_KEY', 'YOUR MAILJET API KEY');
+
 define( 'MAILJET_SECRET_KEY', 'YOUR MAILJET SECRET KEY');
 
 
