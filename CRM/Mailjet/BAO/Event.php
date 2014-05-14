@@ -3,10 +3,19 @@
 class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
 
 
-  static function getMailjetCustomCampaignId($mailingId){
-    $mailing = civicrm_api3('Mailing', 'get', $params = array('id' => $mailingId));
-    $timestamp = strtotime($mailing['values'][$mailingId]['created_date']);
-    return $mailingId . 'MJ' . $timestamp;
+  static function getMailjetCustomCampaignId($jobId){
+  	if($jobId !== null){
+      $mailingJob = civicrm_api3('MailingJob', 'get', $params = array('id' => $jobId));
+	  if(isset($mailingJob['values'][$jobId]['job_type'])){
+	  $jobType = $mailingJob['values'][$jobId]['job_type'];
+	    if($jobType == 'child'){
+          $timestamp = strtotime($mailingJob['values'][$jobId]['scheduled_date']);
+          return $jobId . 'MJ' . $timestamp;
+	    }
+	  }
+	}
+	$timestamp = strtotime("now");
+	return 0 . 'MJ' . $timestamp;
   }
 
   static function recordBounce($params) {

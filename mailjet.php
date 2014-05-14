@@ -14,7 +14,7 @@ function mailjet_civicrm_alterMailParams(&$params, $context) {
     );
     $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
     $mailingId = $mailJobResult['values'][$jobId]['mailing_id'];
-    $params['headers']['X-Mailjet-Campaign'] = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($mailingId);
+    $params['headers']['X-Mailjet-Campaign'] = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId);
   }
 }
 
@@ -27,14 +27,19 @@ function mailjet_civicrm_alterMailParams(&$params, $context) {
 function mailjet_civicrm_pageRun(&$page) {
   if(get_class($page) == 'CRM_Mailing_Page_Report'){
     $mailingId = $page->_mailing_id;
-    $mailing = civicrm_api3('Mailing', 'get', $params = array('id' => $mailingId));
-    $timestamp = strtotime($mailing['values'][$mailingId]['created_date']);
+    $mailingJobs = civicrm_api3('MailingJob', 'get', $params = array('mailing_id' => $mailingId));
+	
+	$jobId = 0;
+	foreach($mailingJobs['values'] as $key => $job){
+		if($job['job_type'] == 'child'){
+			$jobId = $key;
+
     require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
     // Create a new Mailjet Object
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
     $mailJetParams = array(
-      'custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($mailingId)
+      'custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId)
     );
     $response = $mj->messageList($mailJetParams);
     if(!empty($response)){
@@ -51,6 +56,8 @@ function mailjet_civicrm_pageRun(&$page) {
         }
       }
     }
+	}
+	}
     CRM_Core_Region::instance('page-header')->add(array(
       'template' => 'CRM/Mailjet/Page/Report.tpl',
     ));
