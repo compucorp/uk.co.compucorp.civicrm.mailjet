@@ -12,6 +12,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
         return $jobId . 'MJ' . $timestamp;
 	  }
 	}
+	$timestamp = strtotime("now");
 	return 0 . 'MJ' . $timestamp;
   }
 
