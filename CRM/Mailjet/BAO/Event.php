@@ -7,9 +7,11 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
   	if($jobId !== null){
       $mailingJob = civicrm_api3('MailingJob', 'get', $params = array('id' => $jobId));
 	  $jobType = $mailingJob['values'][$jobId]['job_type'];
-	  if($jobType == 'child'){
-        $timestamp = strtotime($mailingJob['values'][$jobId]['scheduled_date']);
-        return $jobId . 'MJ' . $timestamp;
+	  if(isset($jobType)){
+	    if($jobType == 'child'){
+          $timestamp = strtotime($mailingJob['values'][$jobId]['scheduled_date']);
+          return $jobId . 'MJ' . $timestamp;
+	    }
 	  }
 	}
 	$timestamp = strtotime("now");

@@ -33,9 +33,7 @@ function mailjet_civicrm_pageRun(&$page) {
 	foreach($mailingJobs['values'] as $key => $job){
 		if($job['job_type'] == 'child'){
 			$jobId = $key;
-		///////////
-	
-    $timestamp = strtotime($mailing['values'][$mailingId]['created_date']);
+
     require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
     // Create a new Mailjet Object
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
