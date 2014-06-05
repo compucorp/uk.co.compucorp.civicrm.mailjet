@@ -56,7 +56,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
       //put the email into on hold
       $params = array(
         'id' => $emailId,
-        'email' => $email,
+        //'email' => $email,
         'on_hold' => 1,
         'hold_date' =>  $time,
       );
