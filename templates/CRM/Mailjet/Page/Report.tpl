@@ -158,6 +158,8 @@
       }
     });
 
+	//G: lock is called here
+	//TODO: check mailing_id
     $( "#updateMailjetButton" ).on( "click", function() {
       CRM.api('Mailjet','processBounces',{'mailing_id': {/literal}{$mailing_id}{literal}},
         {success: function(data) {

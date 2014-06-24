@@ -43,26 +43,37 @@ class CRM_Utils_Mail_MailjetProcessor {
    */
   static function processBounces($mailingId = NULL) {
     require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-      // Create a new Mailjet Object
+      // Create a new Mailjet Object @php-mailjet.class-mailjet-0.1.php
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
+	
+	//G: TODO
     $mj->debug = 0;
+    
     if($mailingId){
       $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($mailingId));
+		
+	  //G: https://uk.mailjet.com/docs/api/message/list
+	  //List all your messages (both transactional and campaign) with numerous filters.
       $response = $mj->messageList($mailjetParams);
       if(!$response){
          return TRUE; //always return true - we don't process bounces if there is no reponse.
       }
       $campaign = $response->result[0];
+	  //G: https://uk.mailjet.com/docs/api/report/emailbounce
+	  //Lists emails declared as bounce.
+	  //Call
       $response = $mj->reportEmailBounce(array('campaign_id' => $campaign->id));
     }else{
       $response = $mj->reportEmailBounce();
     }
+	//Result
     $bounces = $response->bounces;
     foreach ($bounces as $bounce) {
       $params = array('email' => $bounce->email,'sequential' => 1);
       $emailResult = civicrm_api3('Email', 'get', $params);
       if(!empty($emailResult['values'])){
         //we always get the first result
+        //TODO: might related to bounce record issue
         $contactId = $emailResult['values'][0]['contact_id'];
         $emailId = $emailResult['values'][0]['id'];
         if(!$bounce->customcampaign){
@@ -70,6 +81,7 @@ class CRM_Utils_Mail_MailjetProcessor {
           continue;
         }
         $campaingArray = explode("MJ", $bounce->customcampaign);
+		//TODO: related to bounce record issue
         $mailingId = $campaingArray[0];
         $params = array(
           'mailing_id' => $mailingId,

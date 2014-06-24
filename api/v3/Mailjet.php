@@ -25,6 +25,7 @@ function civicrm_api3_mailjet_processbounces($params) {
     return civicrm_api3_create_error('Could not acquire lock, another MailjetProcessor process is running');
   }
   $mailingId = CRM_Utils_Array::value('mailing_id', $params);
+  //G: this is called when click on "Manually refresh Mailjet's stats" button
   if (!CRM_Utils_Mail_MailjetProcessor::processBounces($mailingId)) {
     $lock->release();
     return civicrm_api3_create_error('Process Bounces failed');
