@@ -25,6 +25,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
     $mailingId = CRM_Utils_Array::value('mailing_id', $params); //CiviCRM mailling ID
     $contactId = CRM_Utils_Array::value('contact_id' , $params);
     $emailId =  CRM_Utils_Array::value('email_id' , $params);
+	$email = CRM_Utils_Array::value('email' , $params);
     $jobId = CRM_Core_DAO::getFieldValue('CRM_Mailing_DAO_MailingJob', $mailingId, 'id', 'mailing_id');
     $eqParams = array(
       'job_id' => $jobId,
@@ -58,7 +59,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
       //put the email into on hold
       $params = array(
         'id' => $emailId,
-        //'email' => $email,
+        'email' => $email,
         'on_hold' => 1,
         'hold_date' =>  $time,
       );

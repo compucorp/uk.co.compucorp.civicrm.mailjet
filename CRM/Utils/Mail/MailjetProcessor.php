@@ -91,6 +91,7 @@ class CRM_Utils_Mail_MailjetProcessor {
         //TODO: might related to bounce record issue
         $contactId = $emailResult['values'][0]['contact_id'];
         $emailId = $emailResult['values'][0]['id'];
+		$emailAddress = $emailResult['values'][0]['email'];
         if(!$bounce->customcampaign){
           //do not process bounce if we dont have custom campaign
           continue;
@@ -136,9 +137,10 @@ class CRM_Utils_Mail_MailjetProcessor {
         if(!$isBounceRecord){
           $bounceArray = array(
             'is_spam' => FALSE,
-            'mailing_id' => $$currentMailingId,
+            'mailing_id' => $currentMailingId,
             'contact_id' => $contactId,
             'email_id' => $emailId,
+            'email' => $emailAddress,
             'blocked' => 0, //if it's manual refresh, we fource it as a normal bounce not blocked
             'hard_bounce' => $bounce->hard_bounce,
             'date_ts' => $bounce->date_ts,
