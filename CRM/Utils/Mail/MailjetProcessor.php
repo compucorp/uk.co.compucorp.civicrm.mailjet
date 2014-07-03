@@ -138,6 +138,7 @@ class CRM_Utils_Mail_MailjetProcessor {
           $bounceArray = array(
             'is_spam' => FALSE,
             'mailing_id' => $currentMailingId,
+            'job_id' => $jobId,
             'contact_id' => $contactId,
             'email_id' => $emailId,
             'email' => $emailAddress,

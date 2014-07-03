@@ -26,7 +26,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
     $contactId = CRM_Utils_Array::value('contact_id' , $params);
     $emailId =  CRM_Utils_Array::value('email_id' , $params);
 	$email = CRM_Utils_Array::value('email' , $params);
-    $jobId = CRM_Core_DAO::getFieldValue('CRM_Mailing_DAO_MailingJob', $mailingId, 'id', 'mailing_id');
+    $jobId = CRM_Utils_Array::value('job_id' , $params);
     $eqParams = array(
       'job_id' => $jobId,
       'contact_id' => $contactId,
