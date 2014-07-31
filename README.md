@@ -16,7 +16,7 @@ Setup instructions for CiviMailjet extensions
 >define( 'MAILJET_SECRET_KEY', 'YOUR MAILJET SECRET KEY');
 
 
-Note: Currently CiviMailjet v1.0 overrides civicrm/CRM/Mailing/BAO/Mailing.php for alter mailing params for Mailjet to use when sending out the email.
+Note: Currently CiviMailjet v1.01 overrides civicrm/CRM/Mailing/BAO/Mailing.php for alter mailing params for Mailjet to use when sending out the email.
 
 
 
