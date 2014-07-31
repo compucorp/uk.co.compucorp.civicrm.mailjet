@@ -43,35 +43,71 @@ class CRM_Utils_Mail_MailjetProcessor {
    */
   static function processBounces($mailingId = NULL) {
     require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-      // Create a new Mailjet Object
+      // Create a new Mailjet Object @php-mailjet.class-mailjet-0.1.php
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
+	
+	//G: TODO
     $mj->debug = 0;
+    
     if($mailingId){
-      $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($mailingId));
+      $apiParams = array(
+      'mailing_id' => $mailingId
+      );
+	  $campaignJobId = 0;
+      $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
+	  foreach ($mailJobResult['values'] as $jobId => $currentJob) {
+		if(isset($currentJob['job_type'])){
+	      $jobType = $currentJob['job_type'];
+		  //if job is not test
+	      if($jobType == 'child'){
+	    	$campaignJobId = $jobId;
+	      }
+	    }
+	  }
+	      	
+      $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($campaignJobId));
+		
+	  //G: https://uk.mailjet.com/docs/api/message/list
+	  //List all your messages (both transactional and campaign) with numerous filters.
       $response = $mj->messageList($mailjetParams);
       if(!$response){
          return TRUE; //always return true - we don't process bounces if there is no reponse.
       }
       $campaign = $response->result[0];
+	  //G: https://uk.mailjet.com/docs/api/report/emailbounce
+	  //Lists emails declared as bounce.
+	  //Call
       $response = $mj->reportEmailBounce(array('campaign_id' => $campaign->id));
     }else{
       $response = $mj->reportEmailBounce();
     }
+	//Result
     $bounces = $response->bounces;
     foreach ($bounces as $bounce) {
       $params = array('email' => $bounce->email,'sequential' => 1);
       $emailResult = civicrm_api3('Email', 'get', $params);
       if(!empty($emailResult['values'])){
         //we always get the first result
+        //TODO: might related to bounce record issue
         $contactId = $emailResult['values'][0]['contact_id'];
         $emailId = $emailResult['values'][0]['id'];
+		$emailAddress = $emailResult['values'][0]['email'];
         if(!$bounce->customcampaign){
           //do not process bounce if we dont have custom campaign
           continue;
         }
         $campaingArray = explode("MJ", $bounce->customcampaign);
-        $mailingId = $campaingArray[0];
-        $params = array(
+		//TODO: related to bounce record issue
+        $jobId = $campaingArray[0];
+		$mailingJobResult = civicrm_api3('MailingJob', 'get', array('id'=>$jobId));
+		$mailingResult = civicrm_api3('Mailing', 'get', array('id'=>$mailingJobResult['values'][$jobId]['mailing_id']));
+		
+		$currentMailingId = 0;
+		foreach ($mailingResult['values'] as $mailingId => $mailing) {
+			$currentMailingId = $mailingId;
+		}
+		
+        /*$params = array(
           'mailing_id' => $mailingId,
         );
         $result = civicrm_api3('MailingJob', 'get', $params);
@@ -83,12 +119,12 @@ class CRM_Utils_Mail_MailjetProcessor {
         $params = array(
           1 => array( $contactId, 'Integer'),
           2 => array( $emailId, 'Integer')
-        );
+        );*/
         $query = "SELECT eq.id
           FROM civicrm_mailing_event_bounce eb
           LEFT JOIN civicrm_mailing_event_queue eq ON eq.id = eb.event_queue_id
           WHERE 1
-          AND eq.job_id IN ($jobIds)
+          AND eq.job_id = $jobId
           AND eq.email_id = $emailId
           AND eq.contact_id = $contactId";
         $dao = CRM_Core_DAO::executeQuery($query);
@@ -101,9 +137,11 @@ class CRM_Utils_Mail_MailjetProcessor {
         if(!$isBounceRecord){
           $bounceArray = array(
             'is_spam' => FALSE,
-            'mailing_id' => $mailingId,
+            'mailing_id' => $currentMailingId,
+            'job_id' => $jobId,
             'contact_id' => $contactId,
             'email_id' => $emailId,
+            'email' => $emailAddress,
             'blocked' => 0, //if it's manual refresh, we fource it as a normal bounce not blocked
             'hard_bounce' => $bounce->hard_bounce,
             'date_ts' => $bounce->date_ts,
