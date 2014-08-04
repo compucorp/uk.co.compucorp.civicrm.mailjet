@@ -5,11 +5,11 @@
   <description>A Mailjet Integration extension for CiviCRM</description>
   <license>the GNU Affero General Public License 3 (GNU AGPL 3) and the CiviCRM Licensing Exception.</license>
   <maintainer>
-    <author>Erawat Chamanont, Jamie Novick</author>
+    <author>Erawat Chamanont, Jamie Novick, Guanhuan Chen</author>
     <email>erawat@compucorp.co.uk, jamie@compucorp.co.uk</email>
   </maintainer>
   <releaseDate>2014-01-29</releaseDate>
-  <version>1.0</version>
+  <version>1.01</version>
   <develStage>beta</develStage>
   <compatibility>
     <ver>4.4</ver>
