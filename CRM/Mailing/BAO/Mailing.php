@@ -1266,7 +1266,9 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       $contact
     );
     $mailParams['toEmail'] = $email;
-
+    
+    //@erawat added $job_id for mailjet to use
+    $mailParams['job_id'] = $job_id;
     CRM_Utils_Hook::alterMailParams($mailParams, 'civimail');
 
     // CRM-10699 support custom email headers
