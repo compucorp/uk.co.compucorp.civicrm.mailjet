@@ -29,108 +29,40 @@
   {strip}
   <table class="crm-info-panel">
     <tr>
-      <td class="label">{ts}Spamass Score{/ts}</td>
-      <td>{$mailjet_stats.spamass_score}</td>
+      <td class="label">{ts}Blocked Count{/ts}</td>
+      <td>{$mailjet_stats.BlockedCount}</td>
     </tr>
     <tr>
-      <td class="label">{ts}Count Messages{/ts}</td>
-      <td>{$mailjet_stats.cnt_messages}</td>
+      <td class="label">{ts}Bounced Count{/ts}</td>
+      <td>{$mailjet_stats.BouncedCount}</td>
     </tr>
      <tr>
-      <td class="label">{ts}Delivered{/ts}</td>
-      <td>{$mailjet_stats.delivered}</td>
+      <td class="label">{ts}Clicked Count{/ts}</td>
+      <td>{$mailjet_stats.ClickedCount}</td>
     </tr>
      <tr>
-      <td class="label">{ts}Opened{/ts}</td>
-      <td>{$mailjet_stats.opened}</td>
+      <td class="label">{ts}Delivered Count{/ts}</td>
+      <td>{$mailjet_stats.DeliveredCount}</td>
     </tr>
      <tr>
-      <td class="label">{ts}Clicked{/ts}</td>
-      <td>{$mailjet_stats.clicked}</td>
+      <td class="label">{ts}Opened Count{/ts}</td>
+      <td>{$mailjet_stats.OpenedCount}</td>
     </tr>
    <tr>
-      <td class="label">{ts}Bounce{/ts}</td>
-      <td>{$mailjet_stats.bounce}</td>
+      <td class="label">{ts}Processed Count{/ts}</td>
+      <td>{$mailjet_stats.ProcessedCount}</td>
     </tr>
        <tr>
-      <td class="label">{ts}Spam{/ts}</td>
-      <td>{$mailjet_stats.spam}</td>
+      <td class="label">{ts}Queued Count{/ts}</td>
+      <td>{$mailjet_stats.QueuedCount}</td>
     </tr>
        <tr>
-      <td class="label">{ts}Unsub{/ts}</td>
-      <td>{$mailjet_stats.unsub} </td>
+      <td class="label">{ts}Spam Complaint Count{/ts}</td>
+      <td>{$mailjet_stats.SpamComplaintCount} </td>
     </tr>
        <tr>
-      <td class="label">{ts}Blocked{/ts}</td>
-      <td>{$mailjet_stats.blocked}</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Queued{/ts}</td>
-      <td>{$mailjet_stats.queued}</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Total{/ts}</td>
-      <td>{$mailjet_stats.total}</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}CTO{/ts}</td>
-      <td>{$mailjet_stats.cto} ({$mailjet.cto|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Delivered Rate{/ts}</td>
-      <td>{$mailjet_stats.delivered_rate} ({$mailjet_stats.delivered_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Queued Rate{/ts}</td>
-      <td>{$mailjet_stats.queued_rate} ({$mailjet_stats.queued_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Opened Rate{/ts}</td>
-      <td>{$mailjet_stats.opened_rate} ({$mailjet_stats.opened_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Clicked Rate{/ts}</td>
-      <td>{$mailjet_stats.clicked_rate} ({$mailjet_stats.clicked_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}CTDR{/ts}</td>
-      <td>{$mailjet_stats.ctdr} ({$mailjet_stats.ctdr|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Bounce Rate{/ts}</td>
-      <td>{$mailjet_stats.bounce_rate} ({$mailjet_stats.bounce_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Spam Rate{/ts}</td>
-      <td>{$mailjet_stats.spam_rate} ({$mailjet_stats.spam_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Blocked Rate{/ts}</td>
-      <td>{$mailjet_stats.blocked_rate} ({$mailjet_stats.blocked_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Unsub Rate{/ts}</td>
-      <td>{$mailjet_stats.unsub_rate} ({$mailjet_stats.unsub_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Failure Rate{/ts}</td>
-      <td>{$mailjet_stats.failure_rate} ({$mailjet_stats.failure_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Average openned Delay{/ts}</td>
-      <td>{$mailjet_stats.avg_opened_delay} </td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Average Opanned Rate{/ts}</td>
-      <td>{$mailjet_stats.avg_opened_rate} </td>
-    </tr>
-     <tr>
-      <td class="label">{ts}Average Clicked Rate{/ts}</td>
-      <td>{$mailjet_stats.avg_clicked_rate} </td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Average Clicked Delay{/ts}</td>
-      <td>{$mailjet_stats.avg_clicked_delay} </td>
+      <td class="label">{ts}Unsubscribed Count{/ts}</td>
+      <td>{$mailjet_stats.UnsubscribedCount}</td>
     </tr>
   </table>
   {/strip}

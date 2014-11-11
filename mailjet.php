@@ -28,36 +28,35 @@ function mailjet_civicrm_pageRun(&$page) {
   if(get_class($page) == 'CRM_Mailing_Page_Report'){
     $mailingId = $page->_mailing_id;
     $mailingJobs = civicrm_api3('MailingJob', 'get', $params = array('mailing_id' => $mailingId));
-	
-	$jobId = 0;
-	foreach($mailingJobs['values'] as $key => $job){
-		if($job['job_type'] == 'child'){
-			$jobId = $key;
+
+        $jobId = 0;
+        foreach($mailingJobs['values'] as $key => $job){
+                if($job['job_type'] == 'child'){
+                        $jobId = $key;
 
     require_once('packages/mailjet-v3/php-mailjet-v3-simple.class.php');
     // Create a new Mailjet Object
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
-    $mj->debug = 0;
+    $mj->debug = 1;
+    $campaignId = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId);
     $mailJetParams = array(
-      'custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId)
+       "method" => "VIEW",
+       "ID" => $campaignId
     );
-    $response = $mj->messageList($mailJetParams);
+    $response = $mj->campaign($mailJetParams);
     if(!empty($response)){
-      if($response->status == 'OK' && $response->total_cnt == 1){
-        $campaign = $response->result[0];
-        $mailJetParams = array(
-          'campaign_id' => $campaign->id
-        );
-        $response = $mj->reportEmailStatistics($mailJetParams);
-        if($response->status == 'OK'){
-          $stats = $response->stats;
+      if($response->Count && $response->Total == 1){
+        $campaign = $response->Data[0];
+        $statsResponse = $mj->campaignstatistics($mailJetParams);
+        if($statsResponse->Count && $statsResponse->Total == 1){
+          $stats = $statsResponse->Data[0];
           $page->assign('mailing_id', $mailingId);
           $page->assign('mailjet_stats', get_object_vars($stats));
         }
       }
     }
-	}
-	}
+        }
+        }
     CRM_Core_Region::instance('page-header')->add(array(
       'template' => 'CRM/Mailjet/Page/Report.tpl',
     ));
