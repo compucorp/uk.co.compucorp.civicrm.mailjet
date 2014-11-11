@@ -42,8 +42,8 @@ class CRM_Utils_Mail_MailjetProcessor {
    *                 fix this to return true on success / false on failure etc
    */
   static function processBounces($mailingId = NULL) {
-    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-      // Create a new Mailjet Object @php-mailjet.class-mailjet-0.1.php
+    require_once('packages/mailjet-v3/php-mailjet-v3-simple.class.php');
+      // Create a new Mailjet Object @php-mailjet-v3-simple.class.php
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
 	
 	//G: TODO

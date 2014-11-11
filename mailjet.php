@@ -34,7 +34,7 @@ function mailjet_civicrm_pageRun(&$page) {
 		if($job['job_type'] == 'child'){
 			$jobId = $key;
 
-    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
+    require_once('packages/mailjet-v3/php-mailjet-v3-simple.class.php');
     // Create a new Mailjet Object
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
     $mj->debug = 0;
