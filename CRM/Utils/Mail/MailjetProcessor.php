@@ -48,41 +48,45 @@ class CRM_Utils_Mail_MailjetProcessor {
 	
 	//G: TODO
     $mj->debug = 0;
-    
+
     if($mailingId){
       $apiParams = array(
       'mailing_id' => $mailingId
       );
-	  $campaignJobId = 0;
+          $campaignJobId = 0;
       $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
-	  foreach ($mailJobResult['values'] as $jobId => $currentJob) {
-		if(isset($currentJob['job_type'])){
-	      $jobType = $currentJob['job_type'];
-		  //if job is not test
-	      if($jobType == 'child'){
-	    	$campaignJobId = $jobId;
-	      }
-	    }
-	  }
-	      	
-      $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($campaignJobId));
-		
-	  //G: https://uk.mailjet.com/docs/api/message/list
-	  //List all your messages (both transactional and campaign) with numerous filters.
-      $response = $mj->messageList($mailjetParams);
+          foreach ($mailJobResult['values'] as $jobId => $currentJob) {
+                if(isset($currentJob['job_type'])){
+              $jobType = $currentJob['job_type'];
+                  //if job is not test
+              if($jobType == 'child'){
+                $campaignJobId = $jobId;
+              }
+            }
+          }
+
+      $campaignId = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($campaignJobId);
+      $mailJetParams = array(
+        "method" => "VIEW",
+        "ID" => $campaignId
+      );
+
+          //G: https://uk.mailjet.com/docs/api/message/list
+          //List all your messages (both transactional and campaign) with numerous filters.
+      $response = $mj->campaign($mailJetParams);
       if(!$response){
          return TRUE; //always return true - we don't process bounces if there is no reponse.
       }
-      $campaign = $response->result[0];
-	  //G: https://uk.mailjet.com/docs/api/report/emailbounce
-	  //Lists emails declared as bounce.
-	  //Call
-      $response = $mj->reportEmailBounce(array('campaign_id' => $campaign->id));
+      $campaign = $response->Data[0];
+          //G: https://uk.mailjet.com/docs/api/report/emailbounce
+          //Lists emails declared as bounce.
+          //Call
+      $statsResponse = $mj->bouncestatistics(array('method' => "VIEW", 'ID' => $campaign->ID));
     }else{
-      $response = $mj->reportEmailBounce();
-    }
-	//Result
-    $bounces = $response->bounces;
+      $statsResponse = $mj->bouncestatistics();
+    }dpm($statsResponse);
+        //Result
+    $bounces = $statsResponse->bounces;
     foreach ($bounces as $bounce) {
       $params = array('email' => $bounce->email,'sequential' => 1);
       $emailResult = civicrm_api3('Email', 'get', $params);
