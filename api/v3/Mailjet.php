@@ -28,7 +28,7 @@ function civicrm_api3_mailjet_processbounces($params) {
   //G: this is called when click on "Manually refresh Mailjet's stats" button
   if (!CRM_Utils_Mail_MailjetProcessor::processBounces($mailingId)) {
     $lock->release();
-    return civicrm_api3_create_error('Process Bounces failed');
+    return civicrm_api3_create_error('No bounces were added to the database. This could be due to them already being added, or no bounces were reported by mailjet.');
   }
   $lock->release();
 
