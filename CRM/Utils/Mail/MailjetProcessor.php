@@ -36,125 +36,129 @@
 class CRM_Utils_Mail_MailjetProcessor {
 
   /**
-   * Process the mailjet bounce emails
+   * Process the mailjet bounce emails.
    *
-   * @return boolean always returns true (for the api). at a later stage we should
-   *                 fix this to return true on success / false on failure etc
+   * @params $mailingId string
+   *  The mailing ID.
+   *
+   * @return boolean always returns true (for the api). at a later stage we
+   *  should fix this to return true on success / false on failure etc.
    */
   static function processBounces($mailingId = NULL) {
-    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-      // Create a new Mailjet Object @php-mailjet.class-mailjet-0.1.php
+    require_once('packages/mailjet-v3/php-mailjet-v3-simple.class.php');
+    // Instantiate a new MJ object.
     $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
-	
-	//G: TODO
     $mj->debug = 0;
-    
-    if($mailingId){
-      $apiParams = array(
-      'mailing_id' => $mailingId
-      );
-	  $campaignJobId = 0;
+
+    // Proceed only if we have a mailing ID.
+    if ($mailingId) {
+      $apiParams = array('mailing_id' => $mailingId);
       $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
-	  foreach ($mailJobResult['values'] as $jobId => $currentJob) {
-		if(isset($currentJob['job_type'])){
-	      $jobType = $currentJob['job_type'];
-		  //if job is not test
-	      if($jobType == 'child'){
-	    	$campaignJobId = $jobId;
-	      }
-	    }
-	  }
-	      	
-      $mailjetParams = array('custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($campaignJobId));
-		
-	  //G: https://uk.mailjet.com/docs/api/message/list
-	  //List all your messages (both transactional and campaign) with numerous filters.
-      $response = $mj->messageList($mailjetParams);
-      if(!$response){
-         return TRUE; //always return true - we don't process bounces if there is no reponse.
+      foreach ($mailJobResult['values'] as $jobId => $currentJob) {
+        if (isset($currentJob['job_type'])) {
+          $jobType = $currentJob['job_type'];
+          $campaignJobId = $jobType == 'child' ? $jobId : FALSE;
+        }
       }
-      $campaign = $response->result[0];
-	  //G: https://uk.mailjet.com/docs/api/report/emailbounce
-	  //Lists emails declared as bounce.
-	  //Call
-      $response = $mj->reportEmailBounce(array('campaign_id' => $campaign->id));
-    }else{
-      $response = $mj->reportEmailBounce();
+
+      // Get the current campaign ID.
+      $campaignId = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($campaignJobId);
+
+      $mailJetParams = array(
+        "method" => "VIEW",
+        "ID" => $campaignId
+      );
+      $campaignInfo = $mj->campaign($mailJetParams);
+      $campaignInfo= $campaignInfo->Data[0];
+
+      // Get the bounce statistics for the current Campaign ID>
+      $mjBounces = $mj->messagesentstatistics(array(
+        'CampaignID' => $campaignInfo->ID,
+        'Allmessages' => 1,
+        'messagestatus' => 'bounce'
+      ));
+
     }
-	//Result
-    $bounces = $response->bounces;
-    foreach ($bounces as $bounce) {
-      $params = array('email' => $bounce->email,'sequential' => 1);
-      $emailResult = civicrm_api3('Email', 'get', $params);
-      if(!empty($emailResult['values'])){
-        //we always get the first result
-        //TODO: might related to bounce record issue
-        $contactId = $emailResult['values'][0]['contact_id'];
-        $emailId = $emailResult['values'][0]['id'];
-		$emailAddress = $emailResult['values'][0]['email'];
-        if(!$bounce->customcampaign){
-          //do not process bounce if we dont have custom campaign
-          continue;
-        }
-        $campaingArray = explode("MJ", $bounce->customcampaign);
-		//TODO: related to bounce record issue
-        $jobId = $campaingArray[0];
-		$mailingJobResult = civicrm_api3('MailingJob', 'get', array('id'=>$jobId));
-		$mailingResult = civicrm_api3('Mailing', 'get', array('id'=>$mailingJobResult['values'][$jobId]['mailing_id']));
-		
-		$currentMailingId = 0;
-		foreach ($mailingResult['values'] as $mailingId => $mailing) {
-			$currentMailingId = $mailingId;
-		}
-		
-        /*$params = array(
-          'mailing_id' => $mailingId,
-        );
-        $result = civicrm_api3('MailingJob', 'get', $params);
-        $jobIds = array();
-        foreach ($result['values'] as $id => $value) {
-          $jobIds[] = $id;
-        }
-        $jobIds = implode(",", $jobIds);
-        $params = array(
-          1 => array( $contactId, 'Integer'),
-          2 => array( $emailId, 'Integer')
-        );*/
-        $query = "SELECT eq.id
+    else {
+      // If we don't have a campaign ID then we process all bounces for our MJ
+      // account.
+      $mjBounces = $mj->messagesentstatistics(array(
+        'Allmessages' => 1,
+        'messagestatus' => 'bounce'
+      ));
+    }
+
+    $mjBounces = $mjBounces->Data;
+
+    // Format the result if we have found any bounces.
+    if (!empty($mjBounces)) {
+      foreach ($mjBounces as $bounce) {
+        // Get the current contact details, as we need the users email, email id
+        // and contact id for further processing.
+        $contactDetails = $mj->contact(array('method' => 'VIEW', 'ID' => $bounce->ContactID));
+        $contactDetails = array_pop($contactDetails->Data);
+        $params = array('email' => $contactDetails->Email, 'sequential' => 1);
+        $emailResult = civicrm_api3('Email', 'get', $params);
+        if (!empty($emailResult['values'])) {
+          $emailResult = array_pop($emailResult['values']);
+          $contactId = $emailResult['contact_id'];
+          $emailId = $emailResult['id'];
+          $emailAddress = $emailResult['email'];
+
+          $mailingJobResult = civicrm_api3('MailingJob', 'get', array('id' => $jobId));
+          $mailingResult = civicrm_api3('Mailing', 'get', array('id' => $mailingJobResult['values'][$jobId]['mailing_id']));
+
+          $currentMailingId = 0;
+          foreach ($mailingResult['values'] as $mailingId => $mailing) {
+            $currentMailingId = $mailingId;
+          }
+          // Check if the bounce was already recorder in the DB.
+          $query = "SELECT eq.id
           FROM civicrm_mailing_event_bounce eb
           LEFT JOIN civicrm_mailing_event_queue eq ON eq.id = eb.event_queue_id
           WHERE 1
           AND eq.job_id = $jobId
           AND eq.email_id = $emailId
           AND eq.contact_id = $contactId";
-        $dao = CRM_Core_DAO::executeQuery($query);
-        $isBounceRecord = FALSE;
-        while ($dao->fetch()) {
-          $isBounceRecord = TRUE;
-          break;
-        }
-        //if bounce record doesn't exsit so we record it
-        if(!$isBounceRecord){
-          $bounceArray = array(
-            'is_spam' => FALSE,
-            'mailing_id' => $currentMailingId,
-            'job_id' => $jobId,
-            'contact_id' => $contactId,
-            'email_id' => $emailId,
-            'email' => $emailAddress,
-            'blocked' => 0, //if it's manual refresh, we fource it as a normal bounce not blocked
-            'hard_bounce' => $bounce->hard_bounce,
-            'date_ts' => $bounce->date_ts,
-            'error_related_to' => $bounce->error_related_to,
-            'error' => $bounce->error
-          );
-          CRM_Mailjet_BAO_Event::recordBounce($bounceArray);
+          $dao = CRM_Core_DAO::executeQuery($query);
+          // We presume that the bounce was already added.
+          $bounceRecordInexistent = TRUE;
+          while ($dao->fetch()) {
+            // If the bounce wasn't already recorded, then we inserted in the DB.
+            $bounceRecordInexistent = FALSE;
+            break;
+          }
+          // Create the bounce record info, and preping it for save.
+          if ($bounceRecordInexistent) {
+            $bounceDate = new DateTime($bounce->BouncedAt);
+            $bounceDate = strtotime($bounceDate->date);
+            $bounceArray = array(
+              'is_spam' => FALSE,
+              'mailing_id' => $currentMailingId,
+              'job_id' => $jobId,
+              'contact_id' => $contactId,
+              'email_id' => $emailId,
+              'email' => $emailAddress,
+              'blocked' => 0,
+              // If it's manual refresh, we force it as a normal bounce and
+              // not blocked.
+              'hard_bounce' => $bounce->hard_bounce,
+              'date_ts' => $bounceDate,
+              'error_related_to' => $bounce->error_related_to,
+              'error' => $bounce->error
+            );
+            // Record the bounce to the database, by supplying all the necessary
+            // info. If the save was successful then the bounce processing can
+            // be marked as successful.
+            if (CRM_Mailjet_BAO_Event::recordBounce($bounceArray)) {
+              return TRUE;
+            };
+          }
         }
       }
     }
-    // always returns true, i.e. never fails :)
-    return TRUE;
+
+    // If nou bounces were found for the current campaign.
+    return FALSE;
   }
-
 }
-

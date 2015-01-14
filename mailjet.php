@@ -6,14 +6,9 @@ require_once 'mailjet.civix.php';
  * Implementation of hook_civicrm_alterMailParams( )
  * To add Mailjet headers in mail
  */
-function mailjet_civicrm_alterMailParams(&$params, $context) {
-  $jobId = CRM_Utils_Array::value('job_id', $params); //CiviCRM job ID
+function mailjet_civicrm_alterMailParams( &$params, $context ) {
+  $jobId = CRM_Utils_Array::value('job_id', $params);
   if(isset($jobId)){
-    $apiParams = array(
-      'id' => $jobId
-    );
-    $mailJobResult = civicrm_api3('MailingJob', 'get', $apiParams);
-    $mailingId = $mailJobResult['values'][$jobId]['mailing_id'];
     $params['headers']['X-Mailjet-Campaign'] = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId);
   }
 }
@@ -25,46 +20,69 @@ function mailjet_civicrm_alterMailParams(&$params, $context) {
  * Handler for pageRun hook.
  */
 function mailjet_civicrm_pageRun(&$page) {
-  if(get_class($page) == 'CRM_Mailing_Page_Report'){
+  if (get_class($page) == 'CRM_Mailing_Page_Report') {
     $mailingId = $page->_mailing_id;
     $mailingJobs = civicrm_api3('MailingJob', 'get', $params = array('mailing_id' => $mailingId));
-	
-	$jobId = 0;
-	foreach($mailingJobs['values'] as $key => $job){
-		if($job['job_type'] == 'child'){
-			$jobId = $key;
-
-    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-    // Create a new Mailjet Object
-    $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
-    $mj->debug = 0;
-    $mailJetParams = array(
-      'custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId)
-    );
-    $response = $mj->messageList($mailJetParams);
-    if(!empty($response)){
-      if($response->status == 'OK' && $response->total_cnt == 1){
-        $campaign = $response->result[0];
-        $mailJetParams = array(
-          'campaign_id' => $campaign->id
+    foreach ($mailingJobs['values'] as $jobId => $job) {
+      if (isset($job['job_type']) && $job['job_type'] == 'child') {
+        require_once('packages/mailjet-v3/php-mailjet-v3-simple.class.php');
+        // Create a new Mailjet Object
+        $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
+        $mj->debug = 0;
+        $campaignId = CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId);
+              $mailJetParams = array(
+          "method" => "VIEW",
+          "ID" => $campaignId
         );
-        $response = $mj->reportEmailStatistics($mailJetParams);
-        if($response->status == 'OK'){
-          $stats = $response->stats;
+
+        // Get campaign statistics.
+        $campaingStatistics = $mj->campaignstatistics($mailJetParams);
+        if ($campaingStatistics->Count && $campaingStatistics->Total == 1) {
+          $campaignReport = array_pop($campaingStatistics->Data);
+        }
+        // Get general campaign info.
+        $campaignInfo = $mj->campaign($mailJetParams);
+        if ($campaignInfo->Count && $campaignInfo->Total == 1) {
+          $campaignInfo = array_pop($campaignInfo->Data);
+          $campaignReport->SpamassScore = $campaignInfo->SpamassScore;
+        }
+
+        // Get the message statistics for the current Campaign ID.
+        $messageStatistics = $mj->messagestatistics(array(
+          'method' => 'VIEW',
+          'CampaignID' => $campaignInfo->ID,
+        ));
+        // If the retrievel of message statistics was successful, then we add
+        // them to the report info.
+        if ($messageStatistics) {
+          $messageStatistics = $messageStatistics->Data[0];
+        }
+        // Add message statistics to the report info.
+        $campaignReport->AverageClickDelay = $messageStatistics->AverageClickDelay;
+        $campaignReport->AverageOpenDelay = $messageStatistics->AverageOpenDelay;
+
+        $totalEmailsProcessed = $campaignReport->ProcessedCount;
+        $campaignReport->DeliverRate = ($campaignReport->DeliveredCount * 100) / $totalEmailsProcessed;
+        $campaignReport->QueuRate = ($campaignReport->QueuedCount * 100) / $totalEmailsProcessed;
+        $campaignReport->OpenRate = ($campaignReport->OpenedCount * 100) / $totalEmailsProcessed;
+        $campaignReport->ClickRate = ($campaignReport->ClickedCount * 100) / $totalEmailsProcessed;
+        $campaignReport->BounceRate = ($campaignReport->BouncedCount * 100) / $totalEmailsProcessed;
+        $campaignReport->BlockRate = ($campaignReport->BlockedCount * 100) / $totalEmailsProcessed;
+        $campaignReport->SpamRate = ($campaignReport->SpamComplaintCount * 100) / $totalEmailsProcessed;
+        $campaignReport->UnsubscribeRate = ($campaignReport->UnsubscribedCount * 100) / $totalEmailsProcessed;
+
+        if (!empty($campaignReport)) {
           $page->assign('mailing_id', $mailingId);
-          $page->assign('mailjet_stats', get_object_vars($stats));
+          $page->assign('mailjet_stats', get_object_vars($campaignReport));
+
+          CRM_Core_Region::instance('page-header')->add(array(
+            'template' => 'CRM/Mailjet/Page/Report.tpl',
+          ));
         }
       }
     }
-	}
-	}
-    CRM_Core_Region::instance('page-header')->add(array(
-      'template' => 'CRM/Mailjet/Page/Report.tpl',
-    ));
   }
 }
-
-
 
 /**
  * Implementation of hook_civicrm_config

@@ -30,107 +30,83 @@
   <table class="crm-info-panel">
     <tr>
       <td class="label">{ts}Spamass Score{/ts}</td>
-      <td>{$mailjet_stats.spamass_score}</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Count Messages{/ts}</td>
-      <td>{$mailjet_stats.cnt_messages}</td>
+      <td>{$mailjet_stats.SpamassScore}</td>
     </tr>
      <tr>
       <td class="label">{ts}Delivered{/ts}</td>
-      <td>{$mailjet_stats.delivered}</td>
+      <td>{$mailjet_stats.DeliveredCount}</td>
     </tr>
      <tr>
       <td class="label">{ts}Opened{/ts}</td>
-      <td>{$mailjet_stats.opened}</td>
+      <td>{$mailjet_stats.OpenedCount}</td>
     </tr>
      <tr>
       <td class="label">{ts}Clicked{/ts}</td>
-      <td>{$mailjet_stats.clicked}</td>
+      <td>{$mailjet_stats.ClickedCount}</td>
     </tr>
    <tr>
       <td class="label">{ts}Bounce{/ts}</td>
-      <td>{$mailjet_stats.bounce}</td>
+      <td>{$mailjet_stats.BouncedCount}</td>
     </tr>
        <tr>
       <td class="label">{ts}Spam{/ts}</td>
-      <td>{$mailjet_stats.spam}</td>
+      <td>{$mailjet_stats.SpamComplaintCount}</td>
     </tr>
        <tr>
       <td class="label">{ts}Unsub{/ts}</td>
-      <td>{$mailjet_stats.unsub} </td>
+      <td>{$mailjet_stats.UnsubscribedCount} </td>
     </tr>
        <tr>
       <td class="label">{ts}Blocked{/ts}</td>
-      <td>{$mailjet_stats.blocked}</td>
+      <td>{$mailjet_stats.BlockedCount}</td>
     </tr>
        <tr>
       <td class="label">{ts}Queued{/ts}</td>
-      <td>{$mailjet_stats.queued}</td>
+      <td>{$mailjet_stats.QueuedCount}</td>
     </tr>
        <tr>
       <td class="label">{ts}Total{/ts}</td>
-      <td>{$mailjet_stats.total}</td>
+      <td>{$mailjet_stats.ProcessedCount}</td>
     </tr>
-       <tr>
-      <td class="label">{ts}CTO{/ts}</td>
-      <td>{$mailjet_stats.cto} ({$mailjet.cto|string_format:"%0.2f"}%)</td>
+    <tr>
+      <td class="label">{ts}Average Click Delay{/ts}</td>
+      <td>{$mailjet_stats.AverageClickDelay}</td>
+    </tr>
+    <tr>
+      <td class="label">{ts}Average Open Delay{/ts}</td>
+      <td>{$mailjet_stats.AverageOpenDelay}</td>
     </tr>
     <tr>
       <td class="label">{ts}Delivered Rate{/ts}</td>
-      <td>{$mailjet_stats.delivered_rate} ({$mailjet_stats.delivered_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.DeliveredCount} ({$mailjet_stats.DeliverRate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Queued Rate{/ts}</td>
-      <td>{$mailjet_stats.queued_rate} ({$mailjet_stats.queued_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.QueuedCount} ({$mailjet_stats.QueuRate|string_format:"%0.2f"}%)</td>
     </tr>
     <tr>
       <td class="label">{ts}Opened Rate{/ts}</td>
-      <td>{$mailjet_stats.opened_rate} ({$mailjet_stats.opened_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.OpenedCount} ({$mailjet_stats.OpenRate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Clicked Rate{/ts}</td>
-      <td>{$mailjet_stats.clicked_rate} ({$mailjet_stats.clicked_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.ClickedCount} ({$mailjet_stats.ClickRate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
-      <td class="label">{ts}CTDR{/ts}</td>
-      <td>{$mailjet_stats.ctdr} ({$mailjet_stats.ctdr|string_format:"%0.2f"}%)</td>
-    </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Bounce Rate{/ts}</td>
-      <td>{$mailjet_stats.bounce_rate} ({$mailjet_stats.bounce_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.BouncedCount} ({$mailjet_stats.BounceRate|string_format:"%0.2f"}%)</td>
     </tr>
        <tr>
       <td class="label">{ts}Spam Rate{/ts}</td>
-      <td>{$mailjet_stats.spam_rate} ({$mailjet_stats.spam_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.SpamComplaintCount} ({$mailjet_stats.SpamRate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Blocked Rate{/ts}</td>
-      <td>{$mailjet_stats.blocked_rate} ({$mailjet_stats.blocked_rate|string_format:"%0.2f"}%)</td>
+      <td>{$mailjet_stats.BlockedCount} ({$mailjet_stats.BlockRate|string_format:"%0.2f"}%)</td>
     </tr>
-       <tr>
+    <tr>
       <td class="label">{ts}Unsub Rate{/ts}</td>
-      <td>{$mailjet_stats.unsub_rate} ({$mailjet_stats.unsub_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Failure Rate{/ts}</td>
-      <td>{$mailjet_stats.failure_rate} ({$mailjet_stats.failure_rate|string_format:"%0.2f"}%)</td>
-    </tr>
-    <tr>
-      <td class="label">{ts}Average openned Delay{/ts}</td>
-      <td>{$mailjet_stats.avg_opened_delay} </td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Average Opanned Rate{/ts}</td>
-      <td>{$mailjet_stats.avg_opened_rate} </td>
-    </tr>
-     <tr>
-      <td class="label">{ts}Average Clicked Rate{/ts}</td>
-      <td>{$mailjet_stats.avg_clicked_rate} </td>
-    </tr>
-       <tr>
-      <td class="label">{ts}Average Clicked Delay{/ts}</td>
-      <td>{$mailjet_stats.avg_clicked_delay} </td>
+      <td>{$mailjet_stats.UnsubscribedCount} ({$mailjet_stats.UnsubscribeRate|string_format:"%0.2f"}%)</td>
     </tr>
   </table>
   {/strip}
@@ -142,35 +118,34 @@
 {/if}
 </fieldset>
 {literal}
- <script>
-  cj(function($) {
-    //remove stats report from the default CiviCRM report as we are more interested in Mailjet's stats
-    $("td").filter(function() {
-      var text = $(this).text();
-      switch (text){
-        case 'Click-throughs':
-        case 'Successful Deliveries':
-        case 'Tracked Opens':
-          $(this).closest("tr").remove();
-          break;
-        default:
-          break;
-      }
-    });
-
-	//G: lock is called here
-	//TODO: check mailing_id
-    $( "#updateMailjetButton" ).on( "click", function() {
-      CRM.api('Mailjet','processBounces',{'mailing_id': {/literal}{$mailing_id}{literal}},
-        {success: function(data) {
-          location.reload(true);
-        }}
-      );
-    }); //end on click button*/
+<script>
+cj(function($) {
+  //remove stats report from the default CiviCRM report as we are more interested in Mailjet's stats
+  $("td").filter(function() {
+    var text = $(this).text();
+    switch (text){
+      case 'Click-throughs':
+      case 'Successful Deliveries':
+      case 'Tracked Opens':
+        $(this).closest("tr").remove();
+        break;
+      default:
+        break;
+    }
   });
 
- </script>
- {/literal}
+  //G: lock is called here
+  //TODO: check mailing_id
+  $( "#updateMailjetButton" ).on( "click", function() {
+    CRM.api('Mailjet',' processBounces',{'mailing_id': {/literal}{$mailing_id}{literal}}, {success:
+      function(data) {
+        location.reload(true);
+      }
+    });
+  }); //end on click button*/
+});
+</script>
+{/literal}
 
 
 
