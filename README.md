@@ -18,5 +18,5 @@ Setup instructions for CiviMailjet extensions
 
 Note: Currently CiviMailjet v1.01 overrides civicrm/CRM/Mailing/BAO/Mailing.php for alter mailing params for Mailjet to use when sending out the email.
 
-
+Please find more details in extension Wiki https://github.com/compucorp/uk.co.compucorp.civicrm.mailjet/wiki
 
