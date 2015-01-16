@@ -1082,7 +1082,6 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     $contactDetails, &$attachments, $isForward = FALSE,
     $fromEmail = NULL, $replyToEmail = NULL
   ) {
-
     $config = CRM_Core_Config::singleton();
     $knownTokens = $this->getTokens();
 
@@ -1110,6 +1109,11 @@ ORDER BY   civicrm_email.is_bulkmail DESC
 
     if ($contactDetails) {
       $contact = $contactDetails;
+    }
+    elseif ($contactId === 0) {
+      //anonymous user
+      $contact = array();
+      CRM_Utils_Hook::tokenValues($contact, $contactId, $job_id);
     }
     else {
       $params = array(array('contact_id', '=', $contactId, 0, 0));
@@ -1523,13 +1527,12 @@ ORDER BY   civicrm_email.is_bulkmail DESC
         'from_email'      => $domain_email,
         'from_name'       => $domain_name,
         'msg_template_id' => NULL,
-        'contact_id'      => $params['created_id'],
         'created_id'      => $params['created_id'],
-        'approver_id'     => $params['created_id'],
+        'approver_id'     => NULL,
         'auto_responder'  => 0,
         'created_date'    => date('YmdHis'),
-        'scheduled_date'  => date('YmdHis'),
-        'approval_date'   => date('YmdHis'),
+        'scheduled_date'  => NULL,
+        'approval_date'   => NULL,
       );
 
       // Get the default from email address, if not provided.
@@ -1604,13 +1607,16 @@ ORDER BY   civicrm_email.is_bulkmail DESC
      * 'approval_status_id' set in
      * CRM_Mailing_Form_Schedule::postProcess() or via API.
      */
-    if (isset($params['approval_status_id']) && $params['approval_status_id']) {
+    if (!empty($params['scheduled_date']) && $params['scheduled_date'] != 'null') {
       $job = new CRM_Mailing_BAO_MailingJob();
       $job->mailing_id = $mailing->id;
       $job->status = 'Scheduled';
       $job->is_test = 0;
-      $job->scheduled_date = $params['scheduled_date'];
-      $job->save();
+
+      if ( !$job->find(TRUE) ) {
+        $job->scheduled_date = $params['scheduled_date'];
+        $job->save();
+      }
       // Populate the recipients.
       $mailing->getRecipients($job->id, $mailing->id, NULL, NULL, TRUE, FALSE);
     }
@@ -2646,7 +2652,7 @@ WHERE  civicrm_mailing_job.id = %1
 
   static function processQueue($mode = NULL) {
     $config = &CRM_Core_Config::singleton();
- //   CRM_Core_Error::debug_log_message("Beginning processQueue run: {$config->mailerJobsMax}, {$config->mailerJobSize}");
+     //   CRM_Core_Error::debug_log_message("Beginning processQueue run: {$config->mailerJobsMax}, {$config->mailerJobSize}");
 
     if ($mode == NULL && CRM_Core_BAO_MailSettings::defaultDomain() == "EXAMPLE.ORG") {
       CRM_Core_Error::fatal(ts('The <a href="%1">default mailbox</a> has not been configured. You will find <a href="%2">more info in the online user and administrator guide</a>', array(1 => CRM_Utils_System::url('civicrm/admin/mailSettings', 'reset=1'), 2 => "http://book.civicrm.org/user/advanced-configuration/email-system-configuration/")));
@@ -2655,8 +2661,8 @@ WHERE  civicrm_mailing_job.id = %1
     // check if we are enforcing number of parallel cron jobs
     // CRM-8460
     $gotCronLock = FALSE;
-    if ($config->mailerJobsMax && $config->mailerJobsMax > 1) {
 
+    if (property_exists($config, 'mailerJobsMax') && $config->mailerJobsMax && $config->mailerJobsMax > 1) {
       $lockArray = range(1, $config->mailerJobsMax);
       shuffle($lockArray);
 
@@ -2683,7 +2689,8 @@ WHERE  civicrm_mailing_job.id = %1
     // load bootstrap to call hooks
 
     // Split up the parent jobs into multiple child jobs
-    CRM_Mailing_BAO_MailingJob::runJobs_pre($config->mailerJobSize, $mode);
+    $mailerJobSize = (property_exists($config, 'mailerJobSize')) ? $config->mailerJobSize : NULL;
+    CRM_Mailing_BAO_MailingJob::runJobs_pre($mailerJobSize, $mode);
     CRM_Mailing_BAO_MailingJob::runJobs(NULL, $mode);
     CRM_Mailing_BAO_MailingJob::runJobs_post($mode);
 
@@ -2812,7 +2819,7 @@ AND        m.id = %1
         )
       );
 
-      $contactMailings[$mailingId]['links'] = CRM_Core_Action::formLink($actionLinks);
+      $contactMailings[$mailingId]['links'] = CRM_Core_Action::formLink($actionLinks, NULL, array());
     }
 
     return $contactMailings;
