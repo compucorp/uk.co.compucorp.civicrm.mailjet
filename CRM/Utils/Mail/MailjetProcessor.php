@@ -75,7 +75,8 @@ class CRM_Utils_Mail_MailjetProcessor {
       $mjBounces = $mj->messagesentstatistics(array(
         'CampaignID' => $campaignInfo->ID,
         'Allmessages' => 1,
-        'messagestatus' => 'bounce'
+        'messagestatus' => 'bounce',
+        'ShowExtraData' => 1,
       ));
 
     }
@@ -130,8 +131,13 @@ class CRM_Utils_Mail_MailjetProcessor {
           }
           // Create the bounce record info, and preping it for save.
           if ($bounceRecordInexistent) {
-            $bounceDate = new DateTime($bounce->BouncedAt);
-            $bounceDate = strtotime($bounceDate->date);
+            if ($bounce->BouncedAt) {
+              $bounceDate = new DateTime($bounce->BouncedAt);
+            }
+            else if ($bounce->BounceDate) {
+              $bounceDate =  new DateTime($bounce->BounceDate);
+            }
+            $bounceDate = strtotime($bounceDate->format('Y-m-d H:i:s'));
             $bounceArray = array(
               'is_spam' => FALSE,
               'mailing_id' => $currentMailingId,
