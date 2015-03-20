@@ -25,7 +25,7 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
     $mailingId = CRM_Utils_Array::value('mailing_id', $params); //CiviCRM mailling ID
     $contactId = CRM_Utils_Array::value('contact_id' , $params);
     $emailId =  CRM_Utils_Array::value('email_id' , $params);
-	$email = CRM_Utils_Array::value('email' , $params);
+	  $email = CRM_Utils_Array::value('email' , $params);
     $jobId = CRM_Utils_Array::value('job_id' , $params);
     $eqParams = array(
       'job_id' => $jobId,

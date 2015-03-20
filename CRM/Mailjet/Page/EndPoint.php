@@ -33,29 +33,38 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
     $post = trim(file_get_contents('php://input'));
     if(empty($post)) {
       header('HTTP/1.1 421 No event');
-       // => do action
+      watchdog('mailjet', 'Empty campaign STATs', NULL, WATCHDOG_ERROR);
       return;
     }
 
     //Decode Trigger Informations
     $trigger = json_decode($post, true);
+    watchdog('mailjet', '<pre>' . print_r( $trigger, true) . '</pre>', NULL, WATCHDOG_DEBUG);
 
     //No Informations sent with the Event
     if(!is_array($trigger) || !isset($trigger['event'])) {
       header('HTTP/1.1 422 Not ok');
-      // TODO:: notifiy admin
+      watchdog('mailjet', 'No event info found in STATs', NULL, WATCHDOG_ERROR);
       return;
     }
 
     $event = $trigger['event'];
     $email = $trigger['email'];
     $time = date('YmdHis', $trigger['time']);
-    $mailingId = CRM_Utils_Array::value('customcampaign', $trigger); //CiviCRM mailling ID
+    if(is_null($trigger['customcampaign'])){
+      watchdog('mailjet', 'customcampaign is empty', NULL, WATCHDOG_DEBUG);
+      return;
+    }
+    $campaignJobId = strstr($trigger['customcampaign'], 'MJ', true);
+    if($campaignJobId) {
+      $mailJobResult = civicrm_api3('MailingJob', 'getvalue', array('id' => $campaignJobId, 'return' => 'mailing_id'));
+    }
+    $mailingId = $mailJobResult; //CiviCRM mailling ID
     if($mailingId){ //we only process if mailing_id exist - marketing email
       $mailjetCampaignId = CRM_Utils_Array::value('mj_campaign_id', $trigger);
       $mailjetContactId = CRM_Utils_Array::value('mj_contact_id' , $trigger);
 
-      $mailjetEvent   = new CRM_Mailjet_DAO_Event();
+      $mailjetEvent = new CRM_Mailjet_DAO_Event();
       $mailjetEvent->mailing_id = $mailingId;
       $mailjetEvent->email = $email;
       $mailjetEvent->event = $event;
@@ -73,17 +82,33 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
         return;
       }
 
-      $emailResult = civicrm_api3('Email', 'get', array('email' => $email));
+      $emailResult = civicrm_api3('Email', 'get', array('email' => $email, 'sequential' => 1));
       if(isset($emailResult['values']) && !empty($emailResult['values'])){
         //we always get the first result
         $contactId = $emailResult['values'][0]['contact_id'];
         $emailId = $emailResult['values'][0]['id'];
         $params = array(
           'mailing_id' => $mailingId,
+          'job_id' => $campaignJobId,
+          'email' => $email,
           'contact_id' => $contactId,
           'email_id' => $emailId,
           'date_ts' =>  $trigger['time'],
         );
+
+        $query = "SELECT eq.id
+          FROM civicrm_mailing_event_bounce eb
+          LEFT JOIN civicrm_mailing_event_queue eq ON eq.id = eb.event_queue_id
+          WHERE 1
+          AND eq.job_id = $campaignJobId
+          AND eq.email_id = $emailId
+          AND eq.contact_id = $contactId";
+        $dao = CRM_Core_DAO::executeQuery($query);
+
+        while ($dao->fetch()) {
+          break;
+        }
+
         /*
         *  Event handler
         *  - please check https://www.mailjet.com/docs/event_tracking for further informations.
@@ -107,7 +132,7 @@ class CRM_Mailjet_Page_EndPoint extends CRM_Core_Page {
               $params['is_spam'] = TRUE;
             }else{
               $params['is_spam'] = FALSE;
-            }
+            }watchdog('mailjet', '<pre>' . print_r( $params, true) . '</pre>', NULL, WATCHDOG_ERROR);
             CRM_Mailjet_BAO_Event::recordBounce($params);
             //TODO: handle error
             break;

@@ -30,33 +30,35 @@ function mailjet_civicrm_pageRun(&$page) {
     $mailingJobs = civicrm_api3('MailingJob', 'get', $params = array('mailing_id' => $mailingId));
 	
 	$jobId = 0;
-	foreach($mailingJobs['values'] as $key => $job){
-		if($job['job_type'] == 'child'){
-			$jobId = $key;
+	foreach($mailingJobs['values'] as $key => $job) {
+      if(isset($job['job_type'])){
+        if ($job['job_type'] == 'child') {
+            $jobId = $key;
 
-    require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
-    // Create a new Mailjet Object
-    $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
-    $mj->debug = 0;
-    $mailJetParams = array(
-      'custom_campaign' =>  CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId)
-    );
-    $response = $mj->messageList($mailJetParams);
-    if(!empty($response)){
-      if($response->status == 'OK' && $response->total_cnt == 1){
-        $campaign = $response->result[0];
-        $mailJetParams = array(
-          'campaign_id' => $campaign->id
-        );
-        $response = $mj->reportEmailStatistics($mailJetParams);
-        if($response->status == 'OK'){
-          $stats = $response->stats;
-          $page->assign('mailing_id', $mailingId);
-          $page->assign('mailjet_stats', get_object_vars($stats));
+            require_once('packages/mailjet-0.1/php-mailjet.class-mailjet-0.1.php');
+            // Create a new Mailjet Object
+            $mj = new Mailjet(MAILJET_API_KEY, MAILJET_SECRET_KEY);
+            $mj->debug = 0;
+            $mailJetParams = array(
+                'custom_campaign' => CRM_Mailjet_BAO_Event::getMailjetCustomCampaignId($jobId)
+            );
+            $response = $mj->messageList($mailJetParams);
+            if (!empty($response)) {
+                if ($response->status == 'OK' && $response->total_cnt == 1) {
+                    $campaign = $response->result[0];
+                    $mailJetParams = array(
+                        'campaign_id' => $campaign->id
+                    );
+                    $response = $mj->reportEmailStatistics($mailJetParams);
+                    if ($response->status == 'OK') {
+                        $stats = $response->stats;
+                        $page->assign('mailing_id', $mailingId);
+                        $page->assign('mailjet_stats', get_object_vars($stats));
+                    }
+                }
+            }
         }
       }
-    }
-	}
 	}
     CRM_Core_Region::instance('page-header')->add(array(
       'template' => 'CRM/Mailjet/Page/Report.tpl',

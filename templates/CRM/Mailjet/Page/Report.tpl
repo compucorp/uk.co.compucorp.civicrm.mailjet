@@ -145,18 +145,18 @@
  <script>
   cj(function($) {
     //remove stats report from the default CiviCRM report as we are more interested in Mailjet's stats
-    $("td").filter(function() {
-      var text = $(this).text();
-      switch (text){
-        case 'Click-throughs':
-        case 'Successful Deliveries':
-        case 'Tracked Opens':
-          $(this).closest("tr").remove();
-          break;
-        default:
-          break;
-      }
-    });
+    //$("td").filter(function() {
+      //var text = $(this).text();
+      //switch (text){
+        //case 'Click-throughs':
+        //case 'Successful Deliveries':
+        //case 'Tracked Opens':
+          //$(this).closest("tr").remove();
+          //break;
+        //default:
+          //break;
+      //}
+    //});
 
 	//G: lock is called here
 	//TODO: check mailing_id
