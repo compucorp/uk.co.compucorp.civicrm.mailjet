@@ -32,13 +32,29 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
       'contact_id' => $contactId,
       'email_id' => $emailId,
     );
-    $eventQueue = CRM_Mailing_Event_BAO_Queue::create($eqParams);
+    //$eventQueue = CRM_Mailing_Event_BAO_Queue::create($eqParams);
+
+    $query = "SELECT id, hash
+              FROM civicrm_mailing_event_queue
+              WHERE job_id = {$jobId}
+              AND email_id = {$emailId}";
+    $dao = CRM_Core_DAO::executeQuery($query);
+
+    if ($dao->fetch()) {
+      $eventQueueId = $dao->id;
+      $eventQueueHash = $dao->hash;
+    }else{
+      return;
+    }
+
     $time =  date('YmdHis', CRM_Utils_Array::value('date_ts', $params));
     $bounceType = array();
     CRM_Core_PseudoConstant::populate($bounceType, 'CRM_Mailing_DAO_BounceType', TRUE, 'id', NULL, NULL, NULL, 'name');
     $bounce  = new CRM_Mailing_Event_BAO_Bounce();
     $bounce->time_stamp = $time;
-    $bounce->event_queue_id = $eventQueue->id;
+    $bounce->event_queue_id = $eventQueueId;
+    $bounce->hash = $eventQueueHash;
+    $bounce->job_id = $jobId;
     if($isSpam){
       $bounce->bounce_type_id = $bounceType[CRM_Mailjet_Upgrader::SPAM];
       $bounce->bounce_reason = CRM_Utils_Array::value('source', $params); //bounce reason when spam occured
@@ -54,23 +70,29 @@ class CRM_Mailjet_BAO_Event extends CRM_Mailjet_DAO_Event {
       }
       $bounce->bounce_reason  =  $params['error_related_to'] . " - " . $params['error'];
     }
-     $bounce->save();
-     if($bounce->bounce_type_id == $bounceType[CRM_Mailjet_Upgrader::SOFT_BOUNCE]){
-      //put the email into on hold
+    $bounce->save();
+
+    $query = "DELETE from civicrm_mailing_event_delivered
+              WHERE event_queue_id = {$eventQueueId}";
+    $dao = CRM_Core_DAO::executeQuery($query);
+
+    if($bounce->bounce_type_id == $bounceType[CRM_Mailjet_Upgrader::SOFT_BOUNCE]){
+    //put the email into on hold
+    $params = array(
+      'id' => $emailId,
+      'email' => $email,
+      'on_hold' => 1,
+      'hold_date' =>  $time,
+    );
+    civicrm_api3('Email', 'create', $params);
+    }else {
       $params = array(
-        'id' => $emailId,
-        'email' => $email,
-        'on_hold' => 1,
-        'hold_date' =>  $time,
+        'id' => $contactId,
+        'do_not_email' => 1,
       );
-      civicrm_api3('Email', 'create', $params);
-      }else {
-        $params = array(
-          'id' => $contactId,
-          'do_not_email' => 1,
-        );
-        civicrm_api3('Contact', 'create', $params);
-      }
+      civicrm_api3('Contact', 'create', $params);
+    }
+
     return TRUE;
   }
 }

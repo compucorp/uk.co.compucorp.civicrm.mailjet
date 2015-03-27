@@ -91,7 +91,7 @@ class CRM_Utils_Mail_MailjetProcessor {
         //TODO: might related to bounce record issue
         $contactId = $emailResult['values'][0]['contact_id'];
         $emailId = $emailResult['values'][0]['id'];
-		$emailAddress = $emailResult['values'][0]['email'];
+		    $emailAddress = $emailResult['values'][0]['email'];
         if(!$bounce->customcampaign){
           //do not process bounce if we dont have custom campaign
           continue;
