@@ -7,8 +7,8 @@ See the extension page at https://civicrm.org/extensions/civimailjet
 Setup instructions for CiviMailjet extensions
 
 1. Download and install the extension into the site extension directory.
-2. Set up the CiviCRM Outbond email using SMTP  with  Mailjet's SMTP Credentials.
-3. Config Event Tracking Endpoint Url in your Mailjet account using http://<sites>/civicrm/mailjet/event/endpoint
+2. Set up the CiviCRM Outbound email using SMTP  with  Mailjet's SMTP Credentials - menu Administer/System Settings/OutboundEmail(SMTP/Sendmail)
+3. Config Event Tracking Endpoint Url in your Mailjet account using  http://<sites>/default/ext/mailjet/CRM/Mailjet/Page/endpoint (where ext is your extensions directory and mailjet is this extension name)
 4. Add add the code below into the site civicrm settings file and put your mailjet api and secret key
 
 
